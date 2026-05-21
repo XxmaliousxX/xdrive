@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string>
 
-// ── Drive curve 
+// ── Drive curve ─────────────────────────────────────────────────────────────
 static float driveCurve(float input, float deadband = 5.f,
                          float minOutput = 15.f, float gain = 1.3f) {
     if (std::fabs(input) <= deadband) return 0.f;
@@ -26,7 +26,6 @@ static void xDrive(float fwd, float strafe, float turn) {
     float bl = fwd - strafe + turn;
     float br = fwd + strafe - turn;
 
-    // Scale down proportionally if any wheel would exceed 127
     float maxVal = std::max({std::fabs(tl), std::fabs(tr),
                              std::fabs(bl), std::fabs(br), 127.f});
     float scale = 127.f / maxVal;
@@ -37,8 +36,27 @@ static void xDrive(float fwd, float strafe, float turn) {
     bottom_right.move((int)(br * scale));
 }
 
+// ── initialize ──────────────────────────────────────────────────────────────
+void initialize() {
+    initializeRobot(); // sets motor reversal flags from xdrive_config.cpp
+
+    // Calibrate IMU — this blocks until done (typically ~2 seconds)
+    imu.reset(true); // true = block until calibration is complete
+
+    // Set the robot's starting pose (x, y, heading in degrees)
+    // 0, 0, 0 = origin, facing forward (+y direction)
+    chassis.setPose(0, 0, 0);
+
+    // Start the odometry background task at 10 ms (100 Hz)
+    odom.startTask(10);
+}
+
+// ── autonomous ──────────────────────────────────────────────────────────────
 void autonomous() {
-    
+    // Write your autonomous routine here using the chassis object.
+    // Example:
+    //   chassis.moveToPoint(0, 24, 2000);
+    //   chassis.turnToHeading(90, 1500);
 }
 
 // ── opcontrol ───────────────────────────────────────────────────────────────
@@ -55,7 +73,6 @@ void opcontrol() {
         float turn   = driveCurve( master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
 
         xDrive(fwd, strafe, turn);
-
 
         // ── Motor temp warning (every 2 s) ─────────────────────────────────
         if (pros::millis() - lastTempCheck > 2000) {

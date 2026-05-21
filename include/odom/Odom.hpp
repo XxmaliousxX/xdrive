@@ -3,7 +3,6 @@
 #include "pros/rotation.hpp"
 #include "pros/imu.hpp"
 #include "pros/rtos.hpp"
-#include "pros/mutex.hpp"
 #include <optional>
 
 namespace xdrive {

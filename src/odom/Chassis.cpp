@@ -177,8 +177,12 @@ void XDriveChassis::moveToPoint(float tx, float ty, float timeoutMs,
             prevLateralOut = lateralOut;
 
             // Decompose into fwd/strafe by projecting the unit error vector
-            float fwd    = sign * lateralOut * (robotFwd   / dist);
-            float strafe = sign * lateralOut * (robotRight / dist);
+            float fwd    = 0;
+            float strafe = 0;
+            if (dist > 0.001f) {
+                fwd    = sign * lateralOut * (robotFwd   / dist);
+                strafe = sign * lateralOut * (robotRight / dist);
+            }
 
             // ── Heading correction ────────────────────────────────────────────
             float headingErr = angleError(targetHeading, pose.theta);
