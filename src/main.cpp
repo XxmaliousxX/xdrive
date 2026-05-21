@@ -1,0 +1,93 @@
+#include "main.h"
+#include "xdrive_config.h"
+#include <cmath>
+#include <algorithm>
+#include <string>
+
+// ── Drive curve 
+static float driveCurve(float input, float deadband = 5.f,
+                         float minOutput = 15.f, float gain = 1.3f) {
+    if (std::fabs(input) <= deadband) return 0.f;
+    float sign   = input > 0.f ? 1.f : -1.f;
+    float x      = (std::fabs(input) - deadband) / (127.f - deadband);
+    float curved = std::pow(x, gain);
+    return sign * (minOutput + (127.f - minOutput) * curved);
+}
+
+// ── X-drive mixer ───────────────────────────────────────────────────────────
+// fwd:    left stick Y  (+127 = forward)
+// strafe: left stick X  (+127 = right)
+// turn:   right stick X (+127 = clockwise)
+//
+// All four values are scaled together so no motor ever exceeds 127.
+static void xDrive(float fwd, float strafe, float turn) {
+    float tl = fwd + strafe + turn;
+    float tr = fwd - strafe - turn;
+    float bl = fwd - strafe + turn;
+    float br = fwd + strafe - turn;
+
+    // Scale down proportionally if any wheel would exceed 127
+    float maxVal = std::max({std::fabs(tl), std::fabs(tr),
+                             std::fabs(bl), std::fabs(br), 127.f});
+    float scale = 127.f / maxVal;
+
+    top_left    .move((int)(tl * scale));
+    top_right   .move((int)(tr * scale));
+    bottom_left .move((int)(bl * scale));
+    bottom_right.move((int)(br * scale));
+}
+
+void autonomous() {
+    
+}
+
+// ── opcontrol ───────────────────────────────────────────────────────────────
+void opcontrol() {
+
+    uint32_t lastTempCheck    = 0;
+    uint32_t lastBatteryCheck = 0;
+    bool     lowBatteryWarned = false;
+
+    while (true) {
+        // ── Drive ──────────────────────────────────────────────────────────
+        float fwd    = driveCurve( master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+        float strafe = driveCurve( master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X));
+        float turn   = driveCurve( master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
+
+        xDrive(fwd, strafe, turn);
+
+
+        // ── Motor temp warning (every 2 s) ─────────────────────────────────
+        if (pros::millis() - lastTempCheck > 2000) {
+            lastTempCheck = pros::millis();
+
+            double maxTemp = 0;
+            std::string hotMotor;
+
+            auto checkMotor = [&](pros::Motor& m, const char* name) {
+                double t = m.get_temperature();
+                if (t > maxTemp) { maxTemp = t; hotMotor = name; }
+            };
+            checkMotor(top_left,     "TL");
+            checkMotor(top_right,    "TR");
+            checkMotor(bottom_left,  "BL");
+            checkMotor(bottom_right, "BR");
+
+            if (maxTemp >= 50)
+                master.print(0, 0, "HOT: %s %.0fC   ", hotMotor.c_str(), maxTemp);
+        }
+
+        // ── Low battery warning (every 5 s) ───────────────────────────────
+        if (pros::millis() - lastBatteryCheck > 5000) {
+            lastBatteryCheck = pros::millis();
+            int batt = pros::battery::get_capacity();
+            if (batt <= 10 && !lowBatteryWarned) {
+                master.rumble("---");
+                master.print(1, 0, "LOW BATTERY: %d%%", batt);
+                lowBatteryWarned = true;
+            }
+        }
+
+        pros::delay(20);
+    }
+}
