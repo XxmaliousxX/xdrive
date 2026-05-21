@@ -6,24 +6,6 @@
 
 ---
 
-## Code review: does the odom work?
-
-Short answer: **yes, it is correct.** Here's what was verified:
-
-| Area | Status | Notes |
-|---|---|---|
-| Tracking algorithm | ✅ | Implements the standard 5225A arc-chord algorithm |
-| IMU sign convention | ✅ | `get_rotation()` is CCW+, negated → CW+ to match coord system |
-| `dTheta` wrapping | ✅ | Correctly wraps to `[-180, 180]` before computing arc |
-| Global frame rotation | ✅ | Uses `avgTheta` (midpoint heading) for accuracy |
-| `getWheelDist()` | ✅ | `centidegrees / 36000 * π * d` is correct |
-| Thread safety | ✅ | `getPose()` / `setPose()` both lock `m_mutex` |
-| X-drive kinematics | ✅ | `tl = fwd+strafe+turn`, `tr = fwd-strafe-turn`, etc. |
-| `fwd/strafe` division by zero | ✅ | Fixed — guarded with `dist > 0.001f` check |
-| `initialize()` function | ✅ | **Was missing** — now added to `main.cpp` |
-
----
-
 ## Step 1 — Set your port numbers
 
 Open [`include/xdrive_config.h`](include/xdrive_config.h) and change the `#define` values at the top to match your V5 brain wiring:
@@ -120,8 +102,6 @@ void initializeRobot() {
 ---
 
 ## Step 5 — Set your starting pose
-
-In [`src/main.cpp`](src/main.cpp) inside `initialize()`:
 
 ```cpp
 chassis.setPose(0, 0, 0);
