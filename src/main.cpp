@@ -38,8 +38,6 @@ static void xDrive(float fwd, float strafe, float turn) {
 
 // ── initialize ──────────────────────────────────────────────────────────────
 void initialize() {
-    initializeRobot(); // sets motor reversal flags from xdrive_config.cpp
-
     // Calibrate IMU — this blocks until done (typically ~2 seconds)
     imu.reset(true); // true = block until calibration is complete
 

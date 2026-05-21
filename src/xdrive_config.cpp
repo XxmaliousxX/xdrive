@@ -46,11 +46,3 @@ xdrive::XDriveChassis chassis(
     lateralGains,
     angularGains
 );
-
-// ── Motor reversals ─────────────────────────────────────────────────────────
-void initializeRobot() {
-    // Reverse motors that spin "backwards" relative to forward on your bot.
-    // Typically the right side motors need reversing — adjust to match.
-    top_right.set_reversed(true);
-    bottom_right.set_reversed(true);
-}

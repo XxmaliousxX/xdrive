@@ -41,4 +41,3 @@ extern pros::Controller master;
 extern xdrive::Odometry       odom;
 extern xdrive::XDriveChassis   chassis;
 
-void initializeRobot();
