@@ -64,11 +64,39 @@ void opcontrol() {
     uint32_t lastBatteryCheck = 0;
     bool     lowBatteryWarned = false;
 
+    // --- IMU Correction Variables ---
+    // We use get_rotation() because it returns total degrees (e.g. 720) instead of wrapping at 360
+    float targetHeading = imu.get_rotation(); 
+    float kP = 3.0f; // TUNE THIS: Start at 1.0, increase if it drifts, decrease if it oscillates/shakes
+
     while (true) {
         // ── Drive ──────────────────────────────────────────────────────────
         float fwd    = driveCurve( master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
         float strafe = driveCurve( master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X));
         float turn   = driveCurve( master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
+
+        // ── IMU Heading Correction Logic ───────────────────────────────────
+        if (std::fabs(turn) > 0) {
+            // If the driver is actively commanding a turn, update our target to where we are currently facing.
+            targetHeading = imu.get_rotation();
+        } 
+        else if (std::fabs(fwd) > 0 || std::fabs(strafe) > 0) {
+            // If the driver is NOT turning, but IS trying to drive straight/strafe,
+            // we calculate the error between where we want to point and where we are actually pointing.
+            float currentHeading = imu.get_rotation();
+            float error = targetHeading - currentHeading;
+            
+            // Apply Proportional control to auto-correct our heading
+            float correction = error * kP;
+            
+            // Feed this correction into our turn variable
+            turn = correction;
+        } 
+        else {
+            // If the robot is completely stopped, keep updating the target heading.
+            // This prevents the bot from violently snapping back if it gets pushed while sitting still.
+            targetHeading = imu.get_rotation();
+        }
 
         xDrive(fwd, strafe, turn);
 

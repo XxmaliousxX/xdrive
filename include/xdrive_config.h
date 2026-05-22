@@ -7,10 +7,10 @@
 #include "odom/Chassis.hpp"
 
 // ── Motor ports (change to match your wiring) ──────────────────────────────
-#define TOP_LEFT_PORT     1
-#define TOP_RIGHT_PORT    2
-#define BOTTOM_LEFT_PORT  3
-#define BOTTOM_RIGHT_PORT 4
+#define TOP_LEFT_PORT     -1   // all motors physically oriented opposite → all negated
+#define TOP_RIGHT_PORT     2
+#define BOTTOM_LEFT_PORT  -3
+#define BOTTOM_RIGHT_PORT  4
 
 // ── Sensor ports ────────────────────────────────────────────────────────────
 #define IMU_PORT          5
