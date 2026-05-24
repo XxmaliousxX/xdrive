@@ -85,23 +85,7 @@ static xdrive::PIDGains angularGains = { 3.0f, 0.0f, 0.5f, 0.0f };
 
 ---
 
-## Step 4 — Set motor reversal flags
-
-In [`src/xdrive_config.cpp`](src/xdrive_config.cpp), inside `initializeRobot()`:
-
-```cpp
-void initializeRobot() {
-    top_right.set_reversed(true);    // flip these until all wheels
-    bottom_right.set_reversed(true); // spin the same direction when
-                                     // you command forward
-}
-```
-
-**Quick check:** push all four motors forward in the PROS terminal. All wheels should spin so the robot moves **forward**. Reverse whichever ones spin backward.
-
----
-
-## Step 5 — Set your starting pose
+## Step 4 — Set your starting pose
 
 ```cpp
 chassis.setPose(0, 0, 0);
