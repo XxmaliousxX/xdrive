@@ -43,7 +43,6 @@ void initialize() {
 
     // Set the robot's starting pose (x, y, heading in degrees)
     // 0, 0, 0 = origin, facing forward (+y direction)
-    chassis.setPose(0, 0, 0);
 
     // Start the odometry background task at 10 ms (100 Hz)
     odom.startTask(10);
@@ -51,14 +50,50 @@ void initialize() {
 
 // ── autonomous ──────────────────────────────────────────────────────────────
 void autonomous() {
-    // Write your autonomous routine here using the chassis object.
-    // Example:
-    //   chassis.moveToPoint(0, 24, 2000);
-    //   chassis.turnToHeading(90, 1500);
+    // Set motors to BRAKE for precise odometry and PID stopping
+    top_left.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    top_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    bottom_left.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    bottom_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+
+    int auton_selected = 1;
+    switch(auton_selected) {
+    case 1:
+      PID_Tuning_Lateral();
+      break;  
+    case 2:
+      PID_Tuning_Angular();
+      break;
+    case 3:
+      
+      break;  
+    case 4:
+    
+      break;
+    case 5:
+    
+      break;
+    case 6:
+  
+      break;
+    case 7:
+    
+      break;
+    case 8:
+ 
+      break;
+    case 9:
+   
+      break;
 }
 
 // ── opcontrol ───────────────────────────────────────────────────────────────
 void opcontrol() {
+    // Set motors to COAST for smooth driver control
+    top_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    top_right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    bottom_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    bottom_right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 
     uint32_t lastTempCheck    = 0;
     uint32_t lastBatteryCheck = 0;
