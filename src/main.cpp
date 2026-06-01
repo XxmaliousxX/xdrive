@@ -1,8 +1,12 @@
 #include "main.h"
+#include "liblvgl/display/lv_display.h"
 #include "xdrive_config.h"
 #include <cmath>
 #include <algorithm>
 #include <string>
+#include "autonomous.h"
+
+LV_IMAGE_DECLARE(IMG_6553);
 
 // ── Drive curve ─────────────────────────────────────────────────────────────
 static float driveCurve(float input, float deadband = 5.f,
@@ -46,6 +50,17 @@ void initialize() {
 
     // Start the odometry background task at 10 ms (100 Hz)
     odom.startTask(10);
+
+    // 2. Ensure LVGL is initialized (handled by PROS, but do not use pros::lcd::initialize)
+    
+    // 3. Create an LVGL image object on the active screen
+    lv_obj_t * img_obj = lv_image_create(lv_screen_active());
+    
+    // 4. Set the source of the image object to your declared array
+    lv_image_set_src(img_obj, &IMG_6553);
+    
+    // 5. Align the image to the center of the screen
+    lv_obj_align(img_obj, LV_ALIGN_CENTER, 0, 0);
 }
 
 // ── autonomous ──────────────────────────────────────────────────────────────
@@ -85,6 +100,7 @@ void autonomous() {
     case 9:
    
       break;
+    }
 }
 
 // ── opcontrol ───────────────────────────────────────────────────────────────

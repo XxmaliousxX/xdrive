@@ -1,3 +1,5 @@
+#include "xdrive_config.h"
+
 void PID_Tuning_Lateral() {
     chassis.setPose(0,0,0);
     chassis.moveToPoint(0,24,9999);
